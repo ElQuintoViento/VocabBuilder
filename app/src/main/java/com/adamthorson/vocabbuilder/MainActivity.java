@@ -17,17 +17,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
+    // Database
+    public WordDatabaseSQLiteOpenHelper wordDatabaseSQLiteOpenHelper;
     // UI
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private ListView listViewDrawer;
     private Toolbar toolbar;
+    private EditText editTextSearchToolbar;
     // Other
     private String[] drawerOptions;
 
@@ -37,8 +43,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        configureNavigationDrawer();
-        configureToolbar();
+        setupNavigationDrawer();
+        setupToolbar();
+        setupDatabase();
     }
 
     @Override
@@ -60,10 +67,12 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        Log.d(TAG, "hit");
-
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
+            return true;
+        }*/
+        if(id == R.id.action_add_word){
+            addWord();
             return true;
         }
 
@@ -78,14 +87,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void configureToolbar() {
+    private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        // Set left drawer menu icon
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_drawer_2);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // Hide app label
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        // UI toolbar elements
+        editTextSearchToolbar = (EditText) toolbar.findViewById(R.id.edit_text_toolbar_search);
     }
 
-    private void configureNavigationDrawer() {
+    private void setupNavigationDrawer() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -97,8 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (itemId == R.id.action_drawer_main) {
                     f = new MainFragment();
-                }
-                else if (itemId == R.id.action_drawer_settings) {
+                } else if (itemId == R.id.action_drawer_settings) {
                     f = new SettingsFragment();
                 }
 
@@ -135,5 +148,19 @@ public class MainActivity extends AppCompatActivity {
         };
         // Set the drawer toggle as the DrawerListener
         drawerLayout.setDrawerListener(drawerToggle);
+    }
+
+    private void setupDatabase(){
+        wordDatabaseSQLiteOpenHelper = WordDatabaseSQLiteOpenHelper.getSingletonInstance(
+                getApplicationContext());
+    }
+
+    private void addWord(){
+        String word = editTextSearchToolbar.getText().toString();
+        // Skip if missing text
+        if(word.length() < 1){ return; }
+        // Toast.makeText(getApplicationContext(), word, Toast.LENGTH_SHORT).show();
+        // Clear text
+        editTextSearchToolbar.setText("");
     }
 }
