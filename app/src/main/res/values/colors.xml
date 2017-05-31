@@ -3,10 +3,11 @@
     <color name="white">#ffffff</color>
     <color name="grey_500">#9e9e9e</color>
 
-    <color name="primary">#4CAF50</color>
-    <color name="primary_dark">#388E3C</color>
-    <color name="primary_light">#C8E6C9</color>
-    <color name="accent">#8BC34A</color>
+    <color name="transparent">#00000000</color>
+    <color name="primary">#00aa8d</color>
+    <color name="primary_dark">#008975</color>
+    <color name="primary_light">#00bf9a</color>
+    <color name="accent">#e3562e</color>
     <color name="primary_text">#212121</color>
     <color name="secondary_text">#727272</color>
     <color name="icons">#FFFFFF</color>
