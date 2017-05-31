@@ -3,6 +3,7 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_save">Save</string>
     <string name="action_add_word">Add Word</string>
 
     <string name="drawer_open">Open navigation drawer</string>
@@ -18,4 +19,7 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_word">WordActivity</string>
+
+    <string name="lorem_ipsum_sentences">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec at purus imperdiet, facilisis nibh a, faucibus nibh. Suspendisse et purus ac magna interdum mollis. Suspendisse et velit interdum, suscipit sem a, auctor libero. Vivamus lacus ligula, suscipit ac accumsan sed, auctor eu enim. Cras tincidunt rutrum dolor. Sed odio felis, dictum id rutrum in, ullamcorper vitae libero. Duis ultricies facilisis sollicitudin. Cras commodo nisi orci, et gravida ligula finibus in.</string>
 </resources>
