@@ -1,0 +1,73 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.adamthorson.vocabbuilder.WordActivity">
+
+    <include layout="@layout/toolbar_add_word" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="3">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0sp"
+            android:layout_weight="1"
+            android:background="@color/primary_light">
+            <ImageView
+                android:id="@+id/image_view_picture"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:scaleType="fitCenter"
+                android:background="@drawable/camera"/>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/text_view_word"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:padding="@dimen/fragment_padding"
+            android:text="Word"
+            android:textSize="@dimen/text_size_large"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:gravity="center_vertical"
+            android:background="@color/primary"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0sp"
+            android:layout_weight="2"
+            android:layout_margin="@dimen/activity_margin"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:weightSum="2">
+                <EditText
+                    android:id="@+id/edit_text_definition"
+                    android:layout_width="match_parent"
+                    android:layout_height="0sp"
+                    android:layout_weight="1"
+                    android:gravity="top"
+                    android:hint="Definition..."/>
+                <EditText
+                    android:id="@+id/edit_text_usage"
+                    android:layout_width="match_parent"
+                    android:layout_height="0sp"
+                    android:layout_weight="1"
+                    android:gravity="top"
+                    android:hint="Usage..."/>
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
