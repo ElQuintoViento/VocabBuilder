@@ -1,6 +1,11 @@
 package com.adamthorson.vocabbuilder;
 
 import android.provider.BaseColumns;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.TextView;
+
+import java.io.Serializable;
 
 /**
  * Created by tor on 5/27/17.
@@ -45,7 +50,7 @@ public final class WordDatabaseContract {
     }
 
     // Object definition
-    public static class Word{
+    public static class Word implements Serializable{
         private String definition;
         private String usage;
         private String word;
@@ -81,5 +86,19 @@ public final class WordDatabaseContract {
         public boolean isInActiveList(){ return (listType == WORD_LIST_ACTIVE); }
 
         public boolean isInMaintenanceList(){ return (listType == WORD_LIST_MAINTENANCE); }
+    }
+
+    // RecyclerView.ViewHolder definition
+    public static class WordViewHolder extends RecyclerView.ViewHolder{
+        public TextView textViewWord;
+        public TextView textViewDefinition;
+        public TextView textViewUsage;
+
+        public WordViewHolder(View view){
+            super(view);
+            textViewWord = (TextView) view.findViewById(R.id.text_view_word);
+            textViewDefinition = (TextView) view.findViewById(R.id.text_view_definition);
+            textViewUsage = (TextView) view.findViewById(R.id.text_view_usage);
+        }
     }
 }
