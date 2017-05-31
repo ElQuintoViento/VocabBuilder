@@ -1,22 +1,25 @@
 package com.adamthorson.vocabbuilder;
 
-import android.app.Activity;
-import android.os.Bundle;
+import static com.adamthorson.vocabbuilder.WordConstants.*;
 
+import android.app.Activity;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -24,8 +27,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+
 public class MainActivity extends AppCompatActivity {
+    // Class constants
     private static final String TAG = MainActivity.class.getSimpleName();
+
     // Database
     public WordDatabaseSQLiteOpenHelper wordDatabaseSQLiteOpenHelper;
     // UI
@@ -42,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // Keyboard slides over Activity's layout without affecting layout dimensions
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         setupNavigationDrawer();
         setupToolbar();
@@ -72,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }*/
         if(id == R.id.action_add_word){
-            addWord();
+            createNewWordIntent();
             return true;
         }
 
@@ -87,6 +95,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent){
+        if(requestCode == REQUEST_CODE_WORD){
+            if(resultCode == Activity.RESULT_OK){
+                WordDatabaseContract.Word word = (
+                        (WordDatabaseContract.Word)intent.getSerializableExtra(REQUEST_OBJ_WORD));
+                String text = String.format(
+                        "%s\n%s\n%s",
+                        word.getWord(),
+                        word.getDefinition(),
+                        word.getUsage()
+                );
+                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -95,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // Hide app label
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        // UI toolbar elements
+        // UI toolbar_main elements
         editTextSearchToolbar = (EditText) toolbar.findViewById(R.id.edit_text_toolbar_search);
     }
 
@@ -105,27 +131,10 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-
-                Fragment f = null;
-                int itemId = menuItem.getItemId();
-
-                if (itemId == R.id.action_drawer_main) {
-                    f = new MainFragment();
-                } else if (itemId == R.id.action_drawer_settings) {
-                    f = new SettingsFragment();
-                }
-
-                if (f != null) {
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.frame, f);
-                    transaction.commit();
-                    drawerLayout.closeDrawers();
-                    return true;
-                }
-
-                return false;
+                return setFragment(menuItem.getItemId());
             }
         });
+        setFragment(R.id.action_drawer_main);
 
         drawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
@@ -155,12 +164,40 @@ public class MainActivity extends AppCompatActivity {
                 getApplicationContext());
     }
 
-    private void addWord(){
+    private boolean setFragment(int itemId){
+        Fragment f = null;
+
+        if (itemId == R.id.action_drawer_main) {
+            f = new ReviewFragment();
+        } else if (itemId == R.id.action_drawer_settings) {
+            f = new SettingsFragment();
+        }
+
+        if (f != null) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.frame, f);
+            transaction.commit();
+            drawerLayout.closeDrawers();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void createNewWordIntent(){
         String word = editTextSearchToolbar.getText().toString();
         // Skip if missing text
         if(word.length() < 1){ return; }
         // Toast.makeText(getApplicationContext(), word, Toast.LENGTH_SHORT).show();
         // Clear text
         editTextSearchToolbar.setText("");
+        // Clear keyboard
+        View view = getCurrentFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        // Make intent
+        Intent intent = new Intent(this, WordActivity.class);
+        intent.putExtra(REQUEST_STRING_WORD, word);
+        startActivityForResult(intent, REQUEST_CODE_WORD);
     }
 }
