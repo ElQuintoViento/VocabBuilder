@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.adamthorson.vocabbuilder.ReviewFragment">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view_review_card"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/relative_layout_bottom">
+    </android.support.v7.widget.RecyclerView>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="@color/primary_dark">
+
+
+        <ImageButton
+            android:id="@+id/image_button_cancel"
+            android:layout_width="60sp"
+            android:layout_height="60sp"
+            android:layout_marginLeft="10sp"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/cancel"/>
+
+        <ImageButton
+            android:id="@+id/image_button_check"
+            android:layout_width="60sp"
+            android:layout_height="60sp"
+            android:layout_marginRight="10sp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/check"/>
+    </RelativeLayout>
+
+</RelativeLayout>
