@@ -1,7 +1,7 @@
 package com.adamthorson.vocabbuilder;
 
 import static com.adamthorson.vocabbuilder.WordConstants.*;
-import com.adamthorson.vocabbuilder.WordHelpers.*;
+import static com.adamthorson.vocabbuilder.WordDatabaseContract.*;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -85,7 +85,8 @@ public class WordActivity extends AppCompatActivity {
     }
 
     private WordDatabaseContract.Word getWord(){
-        return new WordDatabaseContract.Word(
-                word, "definition", "usage", 0, 0, 0);
+        return new Word(
+                word, "definition", "usage", 0, 0, 0, System.currentTimeMillis()
+        );
     }
 }
