@@ -1,5 +1,7 @@
 package com.adamthorson.vocabbuilder;
 
+import static com.adamthorson.vocabbuilder.WordDatabaseContract.*;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -53,61 +55,81 @@ public class WordDatabaseSQLiteOpenHelper extends SQLiteOpenHelper {
 
 
     // Create
-    public long addWord(String word, String definition){
+    public long addWord(
+            String word, String definition, String usage, int step, int listType, long epoch){
         SQLiteDatabase db = singletonInstance.getWritableDatabase();
         // Map values to columns
         ContentValues contentValues = new ContentValues();
-        contentValues.put(WordDatabaseContract.WordEntry.COLUMN_NAME_WORD, word);
-        contentValues.put(WordDatabaseContract.WordEntry.COLUMN_NAME_DEFINITION, definition);
+        contentValues.put(WordEntry.COLUMN_NAME_WORD, word);
+        contentValues.put(WordEntry.COLUMN_NAME_DEFINITION, definition);
+        contentValues.put(WordEntry.COLUMN_NAME_USAGE, usage);
+        contentValues.put(WordEntry.COLUMN_NAME_STEP, step);
+        contentValues.put(WordEntry.COLUMN_NAME_LIST, listType);
+        contentValues.put(WordEntry.COLUMN_NAME_EPOCH, epoch);
         // Returns row's id
         return db.insert(WordDatabaseContract.WordEntry.TABLE_NAME, null, contentValues);
+
+    }
+
+    public long addWord(String word, String definition, String usage){
+        return addWord(word, definition, usage, 0, WORD_LIST_PRE_QUEUE, System.currentTimeMillis());
+    }
+
+
+    public long addWord(Word word){
+        return addWord(
+                word.getWord(), word.getDefinition(), word.getUsage(),
+                word.getStep(), word.getListType(), System.currentTimeMillis());
     }
 
 
     // Read
-    public ArrayList<WordDatabaseContract.Word> getAllWords(){
+    public ArrayList<Word> getAllWords(){
         return getWords(null);
     }
 
-    public ArrayList<WordDatabaseContract.Word> getPrequeueWords(){
-        return getWordList(WordDatabaseContract.WORD_LIST_PRE_QUEUE);
+    public ArrayList<Word> getPrequeueWords(){ return getWordList(WORD_LIST_PRE_QUEUE); }
+
+    public ArrayList<Word> getActiveWords(){ return getWordList(WORD_LIST_ACTIVE); }
+
+    public ArrayList<Word> getMaintenanceWords(){ return getWordList(WORD_LIST_MAINTENANCE); }
+
+    public ArrayList<Word> getWordList(int listType){
+        // Pseudo word list type
+        if(listType == WORD_LIST_DECK){ return getDeckWords(); }
+        // DB word list types
+        else {
+            HashMap<String, String> whereArgs = new HashMap<String, String>();
+            whereArgs.put(WordEntry.COLUMN_NAME_LIST, Integer.toBinaryString(listType));
+            return getWords(whereArgs);
+        }
     }
 
-    public ArrayList<WordDatabaseContract.Word> getActiveWords(){
-        return getWordList(WordDatabaseContract.WORD_LIST_ACTIVE);
-    }
-
-    public ArrayList<WordDatabaseContract.Word> getMaintenanceWords(){
-        return getWordList(WordDatabaseContract.WORD_LIST_MAINTENANCE);
-    }
-
-    private ArrayList<WordDatabaseContract.Word> getWordList(int listType){
-        HashMap<String, String> whereArgs = new HashMap<String, String>();
-        whereArgs.put(
-                WordDatabaseContract.WordEntry.COLUMN_NAME_LIST, Integer.toBinaryString(listType));
-        return getWords(whereArgs);
-    }
-
-    private ArrayList<WordDatabaseContract.Word> getWords(HashMap<String, String> whereArgs){
-        ArrayList<WordDatabaseContract.Word> words = new ArrayList<WordDatabaseContract.Word>();
-
+    private ArrayList<Word> getWords(HashMap<String, String> whereArgs){
         Cursor cursor = getWordCursor(whereArgs);
+        return getWordsFromCursor(cursor);
+    }
 
-        WordDatabaseContract.Word word;
+
+    private ArrayList<Word> getDeckWords(){
+        // This is INCORRECT
+        return getAllWords();
+    }
+
+
+    private ArrayList<Word> getWordsFromCursor(Cursor cursor){
+        ArrayList<Word> words = new ArrayList<Word>();
+
+        Word word;
         while(cursor.moveToNext()){
-            word = new WordDatabaseContract.Word(
-                    cursor.getString(
-                            cursor.getColumnIndex(WordDatabaseContract.WordEntry.COLUMN_NAME_WORD)),
-                    cursor.getString(
-                            cursor.getColumnIndex(WordDatabaseContract.WordEntry.COLUMN_NAME_DEFINITION)),
-                    cursor.getString(
-                            cursor.getColumnIndex(WordDatabaseContract.WordEntry.COLUMN_NAME_USAGE)),
-                    cursor.getInt(
-                            cursor.getColumnIndex(WordDatabaseContract.WordEntry._ID)),
-                    cursor.getInt(
-                            cursor.getColumnIndex(WordDatabaseContract.WordEntry.COLUMN_NAME_STEP)),
-                    cursor.getInt(
-                            cursor.getColumnIndex(WordDatabaseContract.WordEntry.COLUMN_NAME_LIST))
+            word = new Word(
+                    cursor.getString(cursor.getColumnIndex(WordEntry.COLUMN_NAME_WORD)),
+                    cursor.getString(cursor.getColumnIndex(WordEntry.COLUMN_NAME_DEFINITION)),
+                    cursor.getString(cursor.getColumnIndex(WordEntry.COLUMN_NAME_USAGE)),
+                    cursor.getInt(cursor.getColumnIndex(WordEntry._ID)),
+                    cursor.getInt(cursor.getColumnIndex(WordEntry.COLUMN_NAME_STEP)),
+                    cursor.getInt(cursor.getColumnIndex(WordEntry.COLUMN_NAME_LIST)),
+                    cursor.getLong(cursor.getColumnIndex(WordEntry.COLUMN_NAME_EPOCH))
             );
             words.add(word);
         }
@@ -115,17 +137,19 @@ public class WordDatabaseSQLiteOpenHelper extends SQLiteOpenHelper {
         return words;
     }
 
+
     private Cursor getWordCursor(HashMap<String, String> whereArgs){
         SQLiteDatabase db = singletonInstance.getReadableDatabase();
 
         // Projection specifies returned table columns
         String[] projection = {
-                WordDatabaseContract.WordEntry._ID,
-                WordDatabaseContract.WordEntry.COLUMN_NAME_WORD,
-                WordDatabaseContract.WordEntry.COLUMN_NAME_DEFINITION,
-                WordDatabaseContract.WordEntry.COLUMN_NAME_USAGE,
-                WordDatabaseContract.WordEntry.COLUMN_NAME_STEP,
-                WordDatabaseContract.WordEntry.COLUMN_NAME_LIST
+                WordEntry._ID,
+                WordEntry.COLUMN_NAME_WORD,
+                WordEntry.COLUMN_NAME_DEFINITION,
+                WordEntry.COLUMN_NAME_USAGE,
+                WordEntry.COLUMN_NAME_STEP,
+                WordEntry.COLUMN_NAME_LIST,
+                WordEntry.COLUMN_NAME_EPOCH,
         };
 
         // Filter by selection args
@@ -153,10 +177,10 @@ public class WordDatabaseSQLiteOpenHelper extends SQLiteOpenHelper {
         }
 
         // Sorting rule
-        String sortOrder = WordDatabaseContract.WordEntry.COLUMN_NAME_WORD + " DESC";
+        String sortOrder = WordEntry.COLUMN_NAME_WORD + " DESC";
 
         return db.query(
-                WordDatabaseContract.WordEntry.TABLE_NAME,
+                WordEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -173,9 +197,8 @@ public class WordDatabaseSQLiteOpenHelper extends SQLiteOpenHelper {
     // Delete
     public int removeWord(String word){
         SQLiteDatabase db = singletonInstance.getWritableDatabase();
-        String selection = String.format(
-                "%s LIKE ?", WordDatabaseContract.WordEntry.COLUMN_NAME_WORD);
+        String selection = String.format("%s LIKE ?", WordEntry.COLUMN_NAME_WORD);
         String[] selectionArg = new String[]{word};
-        return db.delete(WordDatabaseContract.WordEntry.TABLE_NAME, selection, selectionArg);
+        return db.delete(WordEntry.TABLE_NAME, selection, selectionArg);
     }
 }
