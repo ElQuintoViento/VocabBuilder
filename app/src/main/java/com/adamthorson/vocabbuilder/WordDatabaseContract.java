@@ -14,9 +14,10 @@ public final class WordDatabaseContract {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "vocabBuilderWordDatabase.db";
     // Other
-    public static final int WORD_LIST_PRE_QUEUE = -128;
-    public static final int WORD_LIST_ACTIVE = 0;
-    public static final int WORD_LIST_MAINTENANCE = 127;
+    public static final int WORD_LIST_DECK = -1;        // Pseudo word list
+    public static final int WORD_LIST_PRE_QUEUE = 0;
+    public static final int WORD_LIST_ACTIVE = 1;
+    public static final int WORD_LIST_MAINTENANCE = 2;
 
 
     // Prevent from unnecessary instantiation
@@ -29,9 +30,10 @@ public final class WordDatabaseContract {
         // Table and column names
         public static final String TABLE_NAME = "word";
         public static final String COLUMN_NAME_DEFINITION = "definition";
-        public static final String COLUMN_NAME_USAGE = "usage";
+        public static final String COLUMN_NAME_EPOCH = "epoch";
         public static final String COLUMN_NAME_LIST = "list";
         public static final String COLUMN_NAME_STEP = "step";
+        public static final String COLUMN_NAME_USAGE = "usage";
         public static final String COLUMN_NAME_WORD = "word";
 
 
@@ -39,6 +41,7 @@ public final class WordDatabaseContract {
                 "CREATE TABLE " + TABLE_NAME + "(" +
                         _ID + " INTEGER PRIMARY KEY," +
                         COLUMN_NAME_DEFINITION + " TEXT NOT NULL," +
+                        COLUMN_NAME_EPOCH + " INTEGER NOT NULL," +
                         COLUMN_NAME_USAGE + " TEXT NOT NULL," +
                         COLUMN_NAME_LIST + " INTEGER NOT NULL DEFAULT " + WORD_LIST_PRE_QUEUE + "," +
                         COLUMN_NAME_STEP + " INTEGER NOT NULL DEFAULT -1," +
@@ -55,17 +58,19 @@ public final class WordDatabaseContract {
         private String usage;
         private String word;
         private int id;
-        private int step;
-        private int listType;
+        private int step = 0;
+        private int listType = WORD_LIST_PRE_QUEUE;
+        private long epoch;
 
 
-        public Word(String word, String definition, String usage, int id, int step, int listType){
+        public Word(String word, String definition, String usage, int id, int step, int listType, long epoch){
             this.word = word;
             this.definition = definition;
             this.usage = usage;
             this.id = id;
             this.step = step;
             this.listType = listType;
+            this.epoch = epoch;
         }
 
 
@@ -80,6 +85,8 @@ public final class WordDatabaseContract {
         public int getListType(){ return listType; }
 
         public int getStep(){ return step; }
+
+        public long getEpoch(){ return epoch; }
 
         public boolean isInPrequeueList(){ return (listType == WORD_LIST_PRE_QUEUE); }
 
